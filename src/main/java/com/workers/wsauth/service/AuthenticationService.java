@@ -1,5 +1,6 @@
 package com.workers.wsauth.service;
 
+import com.workers.wsauth.persistence.entity.Customer;
 import com.workers.wsauth.rest.dto.AuthRequest;
 import com.workers.wsauth.rest.dto.AuthenticationResponse;
 import com.workers.wsauth.util.JwtUtil;
@@ -43,14 +44,14 @@ public class AuthenticationService {
         return authentication;
     }
 
-    private String setAuthenticationContext(Authentication authentication) {
+    private Customer setAuthenticationContext(Authentication authentication) {
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return authentication.getName();
+        return (Customer)authentication.getPrincipal();
     }
 
-    public AuthenticationResponse createAuthenticationResponse(String username) {
-        final String accessToken = jwtUtil.generateToken(username);
-        final String refreshToken = jwtUtil.generateRefreshToken(username);
+    public AuthenticationResponse createAuthenticationResponse(Customer customer) {
+        final String accessToken = jwtUtil.generateToken(customer);
+        final String refreshToken = jwtUtil.generateRefreshToken(customer);
         return new AuthenticationResponse(accessToken, refreshToken);
     }
 

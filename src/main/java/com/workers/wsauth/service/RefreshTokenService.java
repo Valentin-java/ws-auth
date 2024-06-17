@@ -28,10 +28,9 @@ public class RefreshTokenService {
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Что-то пошло не так"));
     }
 
-    private String validateEnabledUser(String username) {
-        customerRepository.findCustomerByUserName(username)
+    private Customer validateEnabledUser(String username) {
+        return customerRepository.findCustomerByUserName(username)
                 .filter(Customer::getEnabled)
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Пользователь не активен"));
-        return username;
     }
 }
