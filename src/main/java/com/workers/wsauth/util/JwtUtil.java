@@ -1,5 +1,7 @@
 package com.workers.wsauth.util;
 
+import com.workers.wsauth.persistence.entity.Customer;
+import com.workers.wsauth.persistence.entity.Role;
 import com.workers.wsauth.service.BlacklistService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -14,9 +16,11 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -45,23 +49,30 @@ public class JwtUtil {
         publicKey = getPublicKeyFromPem(publicKeyString);
     }
 
-    // Генерация токена для пользователя
-    public String generateToken(String username) {
+    public String generateToken(Customer customer) {
         return Jwts.builder()
-                .subject(username)
+                .subject(customer.getUsername())
+                .claim("userId", customer.getId())
+                .claim("roles", getRolesByCustomer(customer))
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExp))
                 .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(Customer customer) {
         return Jwts.builder()
-                .subject(username)
+                .subject(customer.getUsername())
+                .claim("userId", customer.getId())
+                .claim("roles", getRolesByCustomer(customer))
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExp))
                 .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
+    }
+
+    private String getRolesByCustomer(Customer customer) {
+        return new ArrayList<>(customer.getRoles()).stream().map(Role::getRole).collect(Collectors.joining(System.lineSeparator()));
     }
 
     public String extractUsername(String token) {
