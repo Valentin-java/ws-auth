@@ -108,11 +108,8 @@ public class JwtUtil {
         blacklistService.addTokenToBlacklist(token);
     }
 
-    private PrivateKey getPrivateKeyFromPem(String pem) {
+    private PrivateKey getPrivateKeyFromPem(String privateKeyPEM) {
         try {
-            String privateKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
             byte[] keyBytes = Decoders.BASE64.decode(privateKeyPEM);
             PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -122,11 +119,8 @@ public class JwtUtil {
         }
     }
 
-    private PublicKey getPublicKeyFromPem(String pem) {
+    private PublicKey getPublicKeyFromPem(String publicKeyPEM) {
         try {
-            String publicKeyPEM = pem.replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s", "");
             byte[] keyBytes = Decoders.BASE64.decode(publicKeyPEM);
             X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
