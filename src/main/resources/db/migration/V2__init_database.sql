@@ -29,3 +29,9 @@ VALUES(1, 'ADMIN');
 INSERT INTO ws01_role
 (id, "role")
 VALUES(2, 'USER');
+INSERT INTO ws01_role
+(id, "role")
+VALUES(3, 'CUSTOMER');
+INSERT INTO ws01_role
+(id, "role")
+VALUES(4, 'HANDYMAN');

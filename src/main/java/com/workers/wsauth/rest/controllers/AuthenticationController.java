@@ -27,20 +27,17 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerCustomer(@RequestBody AuthRequest request) {
-        Customer customer = customerService.registerNewCustomer(request);
-        return ResponseEntity.ok(customer);
+        return ResponseEntity.ok(customerService.registerNewCustomer(request));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest request) {
-        AuthenticationResponse response = authenticationService.authenticate(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
     @GetMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestParam String token) {
-        AuthenticationResponse response = refreshTokenService.refreshToken(token);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(refreshTokenService.refreshToken(token));
     }
 
     @GetMapping("/validate-token")
