@@ -1,8 +1,6 @@
 package com.workers.wsauth.rest.controllers;
 
-import com.workers.wsauth.persistence.entity.Customer;
 import com.workers.wsauth.rest.dto.AuthRequest;
-import com.workers.wsauth.rest.dto.AuthenticationResponse;
 import com.workers.wsauth.service.AuthenticationService;
 import com.workers.wsauth.service.CustomerService;
 import com.workers.wsauth.service.RefreshTokenService;
