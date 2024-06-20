@@ -9,6 +9,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +28,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtUtil {
 
     @Value("${jwt.private.key}")
@@ -59,7 +61,7 @@ public class JwtUtil {
                 .claim("userId", customer.getId())
                 .claim("roles", getRolesByCustomer(customer))
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExp))
+                .expiration(calculateExpirationDate(accessTokenExp))
                 .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
@@ -70,7 +72,7 @@ public class JwtUtil {
                 .claim("userId", customer.getId())
                 .claim("roles", getRolesByCustomer(customer))
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + refreshTokenExp))
+                .expiration(calculateExpirationDate(refreshTokenExp))
                 .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
@@ -80,7 +82,7 @@ public class JwtUtil {
         return Optional.of(token)
                 .map(this::checkBlackList)
                 .map(this::extractAllClaims)
-                .map(this::isTokenExpired)
+                .map(this::ensureTokenNotExpired)
                 .map(this::validateUser)
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Токен не валидный"));
     }
@@ -102,7 +104,7 @@ public class JwtUtil {
     }
 
     // Проверка истечения срока действия токена
-    private Claims isTokenExpired(Claims claims) {
+    private Claims ensureTokenNotExpired(Claims claims) {
         return Optional.of(claims)
                 .filter(claim -> !claim.getExpiration().before(new Date()))
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Время жизни токена истекло"));
@@ -130,7 +132,8 @@ public class JwtUtil {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePrivate(spec);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid private key", e);
+            log.error("[getPublicKeyFromPem] Invalid private key");
+            throw new ResponseStatusException(UNAUTHORIZED, "Invalid private key");
         }
     }
 
@@ -141,7 +144,12 @@ public class JwtUtil {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePublic(spec);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid public key", e);
+            log.error("[getPublicKeyFromPem] Invalid public key");
+            throw new ResponseStatusException(UNAUTHORIZED, "Invalid public key");
         }
+    }
+
+    private Date calculateExpirationDate(long expiration) {
+        return new Date(System.currentTimeMillis() + expiration);
     }
 }
