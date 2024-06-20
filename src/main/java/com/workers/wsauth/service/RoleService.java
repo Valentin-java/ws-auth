@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Service
@@ -23,7 +24,7 @@ public class RoleService {
 
         Role role = roleRepository.findByRole(roleName);
         if (role == null) {
-            throw new RuntimeException("Role not found");
+            throw new ResponseStatusException(BAD_REQUEST, "Role not found");
         }
 
         customer.getRoles().add(role);

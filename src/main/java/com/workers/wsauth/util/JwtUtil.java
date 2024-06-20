@@ -2,6 +2,7 @@ package com.workers.wsauth.util;
 
 import com.workers.wsauth.persistence.entity.Customer;
 import com.workers.wsauth.persistence.entity.Role;
+import com.workers.wsauth.persistence.repository.CustomerRepository;
 import com.workers.wsauth.service.BlacklistService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -19,8 +21,9 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Component
 @RequiredArgsConstructor
@@ -39,6 +42,7 @@ public class JwtUtil {
     private long refreshTokenExp;
 
     private final BlacklistService blacklistService;
+    private final CustomerRepository customerRepository;
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -71,18 +75,21 @@ public class JwtUtil {
                 .compact();
     }
 
-    private String getRolesByCustomer(Customer customer) {
-        return new ArrayList<>(customer.getRoles()).stream().map(Role::getRole).collect(Collectors.joining(System.lineSeparator()));
+    // Валидация токена для пользователя
+    public Customer validateToken(String token) {
+        return Optional.of(token)
+                .map(this::checkBlackList)
+                .map(this::extractAllClaims)
+                .map(this::isTokenExpired)
+                .map(this::validateUser)
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Токен не валидный"));
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    // Извлечение определенного параметра из токена
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    private String checkBlackList(String token) {
+        if (blacklistService.isTokenBlacklisted(token)) {
+            return null;
+        }
+        return token;
     }
 
     // Извлечение всех параметров из токена
@@ -95,24 +102,21 @@ public class JwtUtil {
     }
 
     // Проверка истечения срока действия токена
-    public Boolean isTokenExpired(Claims claims) {
-        return !claims.getExpiration().before(new Date());
+    private Claims isTokenExpired(Claims claims) {
+        return Optional.of(claims)
+                .filter(claim -> !claim.getExpiration().before(new Date()))
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Время жизни токена истекло"));
     }
 
-    // Валидация токена для пользователя
-    public Boolean validateToken(String token) {
-        return Optional.of(token)
-                .map(this::checkBlackList)
-                .map(this::extractAllClaims)
-                .map(this::isTokenExpired)
-                .orElse(false);
+    private Customer validateUser(Claims claims) {
+        return customerRepository.findCustomerByUserName(claims.getSubject())
+                .filter(Customer::getEnabled)
+                .filter(cli -> claims.get("roles").equals(getRolesByCustomer(cli)))
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Пользователь не прошел валидацию соотвествия"));
     }
 
-    private String checkBlackList(String token) {
-        if (blacklistService.isTokenBlacklisted(token)) {
-            return null;
-        }
-        return token;
+    private String getRolesByCustomer(Customer customer) {
+        return new ArrayList<>(customer.getRoles()).stream().map(Role::getRole).collect(Collectors.joining(System.lineSeparator()));
     }
 
     public void invalidateToken(String token) {

@@ -46,7 +46,7 @@ public class AuthenticationService {
 
     private Customer setAuthenticationContext(Authentication authentication) {
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return (Customer)authentication.getPrincipal();
+        return (Customer) authentication.getPrincipal();
     }
 
     public AuthenticationResponse createAuthenticationResponse(Customer customer) {
@@ -56,11 +56,7 @@ public class AuthenticationService {
     }
 
     public boolean validateToken(String token) {
-        try {
-            return jwtUtil.validateToken(token);
-        } catch (Exception e) {
-            return false;
-        }
+        return jwtUtil.validateToken(token) != null;
     }
 
     public void logout(String token) {
