@@ -12,7 +12,7 @@ spring:
         default_schema: ws-auth
     show-sql: false
   flyway:
-    enabled: true
+    enabled: false
     schemas: ws-auth
     baseline-on-migrate: true
     out-of-order: true
@@ -28,10 +28,7 @@ server:
 
 eureka:
   client:
-    service-url:
-      defaultZone: http://localhost:8000/eureka/
-  instance:
-    prefer-ip-address: true
+    enabled: false
 
 jwt:
   private:

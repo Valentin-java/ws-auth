@@ -45,7 +45,11 @@ dependencies {
 	implementation "org.flywaydb:flyway-core"
 	runtimeOnly 'org.flywaydb:flyway-database-postgresql:10.15.0'
 
+	// Трассировка
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-observation'
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
