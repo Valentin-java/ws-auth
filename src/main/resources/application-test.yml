@@ -3,18 +3,3 @@ spring:
     name: ws-auth
   config:
     import: configserver:${CONFIG_SERVER}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
-  instance:
-    prefer-ip-address: true
-
-management:
-  tracing:
-    sampling:
-      probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: ${ZIPKIN_SERVER}
