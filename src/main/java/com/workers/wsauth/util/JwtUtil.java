@@ -31,6 +31,10 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Slf4j
 public class JwtUtil {
 
+    private static final String TOKEN_TYPE = "type";
+    private static final String TOKEN_ROLES = "roles";
+    private static final String REFRESH_TOKEN_TYPE = "refreshToken";
+
     @Value("${jwt.private.key}")
     private String privateKeyString;
 
@@ -59,7 +63,8 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(customer.getUsername())
                 .claim("userId", customer.getId())
-                .claim("roles", getRolesByCustomer(customer))
+                .claim(TOKEN_ROLES, getRolesByCustomer(customer))
+                .claim(TOKEN_TYPE, "accessToken")
                 .issuedAt(new Date())
                 .expiration(calculateExpirationDate(accessTokenExp))
                 .signWith(privateKey, Jwts.SIG.RS256)
@@ -70,7 +75,8 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(customer.getUsername())
                 .claim("userId", customer.getId())
-                .claim("roles", getRolesByCustomer(customer))
+                .claim(TOKEN_ROLES, getRolesByCustomer(customer))
+                .claim(TOKEN_TYPE, REFRESH_TOKEN_TYPE)
                 .issuedAt(new Date())
                 .expiration(calculateExpirationDate(refreshTokenExp))
                 .signWith(privateKey, Jwts.SIG.RS256)
@@ -83,6 +89,7 @@ public class JwtUtil {
                 .map(this::checkBlackList)
                 .map(this::extractAllClaims)
                 .map(this::ensureTokenNotExpired)
+                .map(this::validateTypeToken)
                 .map(this::validateUser)
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Токен не валидный"));
     }
@@ -108,6 +115,12 @@ public class JwtUtil {
         return Optional.of(claims)
                 .filter(claim -> !claim.getExpiration().before(new Date()))
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Время жизни токена истекло"));
+    }
+
+    private Claims validateTypeToken(Claims claims) {
+        return Optional.of(claims)
+                .filter(claim -> REFRESH_TOKEN_TYPE.equals(claim.get(TOKEN_TYPE)))
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Не соответствует типу рефреш токена"));
     }
 
     private Customer validateUser(Claims claims) {
