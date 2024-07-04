@@ -1,6 +1,6 @@
 package com.workers.wsauth.service;
 
-import com.workers.wsauth.rest.dto.AuthenticationResponse;
+import com.workers.wsauth.rest.dto.AuthResponse;
 import com.workers.wsauth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class RefreshTokenService {
     private final JwtUtil jwtUtil;
     private final AuthenticationService authenticationService;
 
-    public AuthenticationResponse refreshToken(String refreshToken) {
+    public AuthResponse refreshToken(String refreshToken) {
         return Optional.of(refreshToken)
                 .map(jwtUtil::validateToken)
                 .map(authenticationService::createAuthenticationResponse)
