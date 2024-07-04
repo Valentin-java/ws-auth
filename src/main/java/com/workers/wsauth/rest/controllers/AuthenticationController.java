@@ -28,6 +28,11 @@ public class AuthenticationController {
         return ResponseEntity.ok(customerService.registerNewCustomer(request));
     }
 
+    @PostMapping("/activation")
+    public ResponseEntity<?> activationCustomer(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(authenticationService.activationCustomer(request));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest request) {
         return ResponseEntity.ok(authenticationService.authenticate(request));

@@ -20,7 +20,7 @@ public class CustomerService {
             Customer newCustomer = new Customer();
             newCustomer.setUserName(request.username());
             newCustomer.setPassword(passwordEncoder.encode(request.password()));
-            newCustomer.setEnabled(true);
+            newCustomer.setEnabled(false);
             return customerRepository.save(newCustomer);
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Username " + request.username() + " is already taken.");
