@@ -1,4 +1,4 @@
-package com.workers.wsauth.config;
+package com.workers.wsauth.config.mapper;
 
 import org.mapstruct.Builder;
 import org.mapstruct.CollectionMappingStrategy;
