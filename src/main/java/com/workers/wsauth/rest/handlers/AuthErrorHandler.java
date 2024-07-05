@@ -27,6 +27,6 @@ public class AuthErrorHandler {
     }
 
     private ResponseEntity<String> handleResponseStatusException(ResponseStatusException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getReason());
+        return ResponseEntity.status(e.getStatusCode().value()).body(e.getReason());
     }
 }

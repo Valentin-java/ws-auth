@@ -102,7 +102,7 @@ public class JwtUtil {
     }
 
     // Извлечение всех параметров из токена
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(publicKey)
                 .build()

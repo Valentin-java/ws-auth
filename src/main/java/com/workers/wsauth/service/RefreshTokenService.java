@@ -21,6 +21,6 @@ public class RefreshTokenService {
         return Optional.of(refreshToken)
                 .map(jwtUtil::validateToken)
                 .map(authenticationService::createAuthenticationResponse)
-                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Что-то пошло не так"));
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "[RefreshTokenService -> refreshToken] Что-то пошло не так"));
     }
 }
