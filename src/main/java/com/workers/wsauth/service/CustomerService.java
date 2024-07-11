@@ -30,4 +30,22 @@ public class CustomerService {
             throw new ResponseStatusException(BAD_REQUEST, "Пользователь " + request.username() + " уже существует.");
         }
     }
+
+    public Boolean requestToResetPassword(AuthRequest request) {
+        Customer customer = customerRepository.findCustomerByUserName(request.username())
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Не удалось найти пользователя: " + request.username()));
+        customer.setPassword(null);
+        customer.setEnabled(false);
+        customerRepository.save(customer);
+        return true;
+    }
+
+    public Boolean requestToChangePassword(AuthRequest request) {
+        Customer customer = customerRepository.findCustomerByUserName(request.username())
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Не удалось найти пользователя: " + request.username()));
+        customer.setPassword(passwordEncoder.encode(request.password()));
+        customer.setEnabled(true);
+        customerRepository.save(customer);
+        return true;
+    }
 }

@@ -57,4 +57,14 @@ public class AuthenticationController {
         authenticationService.logout(token);
         return ResponseEntity.ok("Successfully logged out");
     }
+
+    @PostMapping("/reset")
+    public ResponseEntity<?> requestToResetPassword(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(customerService.requestToResetPassword(request));
+    }
+
+    @PostMapping("/changepass")
+    public ResponseEntity<?> requestToChangePassword(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(customerService.requestToChangePassword(request));
+    }
 }
