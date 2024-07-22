@@ -17,8 +17,8 @@ public class RoleController {
     private final RoleService roleService;
 
     @PostMapping("/assign-role")
-    public ResponseEntity<?> assignRole(@RequestBody AssignRoleRequest request) {
+    public ResponseEntity<Void> assignRole(@RequestBody AssignRoleRequest request) {
         roleService.assignRoleToUser(request.username(), request.role());
-        return ResponseEntity.ok("Role assigned successfully");
+        return ResponseEntity.ok().build();
     }
 }

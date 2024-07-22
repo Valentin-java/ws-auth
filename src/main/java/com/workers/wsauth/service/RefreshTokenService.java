@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Service
@@ -21,6 +22,6 @@ public class RefreshTokenService {
         return Optional.of(refreshToken)
                 .map(jwtUtil::validateToken)
                 .map(authenticationService::createAuthenticationResponse)
-                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "[RefreshTokenService -> refreshToken] Что-то пошло не так"));
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "[RefreshTokenService -> refreshToken] Что-то пошло не так"));
     }
 }

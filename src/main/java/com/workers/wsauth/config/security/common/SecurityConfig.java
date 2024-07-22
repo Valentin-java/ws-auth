@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Slf4j
 @Configuration
-@EnableWebSecurity(debug = true)
+//@EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -28,7 +28,12 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
     final String[] WHITELIST = {
-            "/v1/workers/auth/**"
+            "/actuator/health",
+            "/actuator/prometheus",
+            "/advisor",
+            "/swagger-ui",
+            "/specs",
+            "/v1/workers/auth/login"
     };
 
     @Bean

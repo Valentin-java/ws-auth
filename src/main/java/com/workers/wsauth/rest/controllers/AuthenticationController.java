@@ -5,7 +5,6 @@ import com.workers.wsauth.service.AuthenticationService;
 import com.workers.wsauth.service.CustomerService;
 import com.workers.wsauth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,13 +23,15 @@ public class AuthenticationController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerCustomer(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(customerService.registerNewCustomer(request));
+    public ResponseEntity<Void> registerCustomer(@RequestBody AuthRequest request) {
+        customerService.registerNewCustomer(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/activation")
-    public ResponseEntity<?> activationCustomer(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authenticationService.activationCustomer(request));
+    public ResponseEntity<Void> activationCustomer(@RequestBody AuthRequest request) {
+        authenticationService.activationCustomer(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
@@ -44,12 +45,9 @@ public class AuthenticationController {
     }
 
     @GetMapping("/validate-token")
-    public ResponseEntity<?> validateToken(@RequestParam String token) {
-        if (authenticationService.validateToken(token)) {
-            return ResponseEntity.ok("Valid token");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+    public ResponseEntity<Void> validateToken(@RequestParam String token) {
+        authenticationService.validateToken(token);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
@@ -59,12 +57,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<?> requestToResetPassword(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(customerService.requestToResetPassword(request));
+    public ResponseEntity<Void> requestToResetPassword(@RequestBody AuthRequest request) {
+        customerService.requestToResetPassword(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/changepass")
-    public ResponseEntity<?> requestToChangePassword(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(customerService.requestToChangePassword(request));
+    public ResponseEntity<Void> requestToChangePassword(@RequestBody AuthRequest request) {
+        customerService.requestToChangePassword(request);
+        return ResponseEntity.ok().build();
     }
 }
