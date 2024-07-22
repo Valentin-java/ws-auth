@@ -6,6 +6,7 @@ import com.workers.wsauth.rest.dto.AuthRequest;
 import com.workers.wsauth.rest.dto.AuthResponse;
 import com.workers.wsauth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,7 +14,6 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Service
 @RequiredArgsConstructor
@@ -21,20 +21,22 @@ public class AuthenticationService {
 
     private final CustomerRepository customerRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthResponse authenticate(AuthRequest request) {
         return Optional.of(request)
                 .map(this::validateUserActivity)
                 .map(this::createAuthenticationResponse)
-                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "[AuthenticationService -> authenticate] Что-то пошло не так"));
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "[AuthenticationService -> authenticate] Что-то пошло не так"));
     }
 
     private Customer validateUserActivity(AuthRequest request) {
         var customer = customerRepository.findCustomerByUserNameAndEnabled(request.username(), Boolean.TRUE);
-        if (customer != null) {
+        if (customer != null
+                && passwordEncoder.matches(request.password(), customer.getPassword())) {
             return customer;
         }
-        throw new ResponseStatusException(UNAUTHORIZED, "Пользователь не активирован");
+        throw new ResponseStatusException(BAD_REQUEST, "Введен неверный пароль");
     }
 
     public AuthResponse createAuthenticationResponse(Customer customer) {
@@ -43,8 +45,8 @@ public class AuthenticationService {
         return new AuthResponse(accessToken, refreshToken);
     }
 
-    public Boolean activationCustomer(AuthRequest request) {
-        return Optional.of(request)
+    public void activationCustomer(AuthRequest request) {
+        Optional.of(request)
                 .map(this::getCustomer)
                 .map(this::validateUserActivity)
                 .map(this::activateCustomer)
@@ -60,7 +62,7 @@ public class AuthenticationService {
         if (!request.isEnabled()) {
             return request;
         }
-        throw new ResponseStatusException(OK, "Пользователь уже активирован");
+        throw new ResponseStatusException(BAD_REQUEST, "Пользователь уже активирован");
     }
 
     private boolean activateCustomer(Customer request) {
@@ -69,8 +71,10 @@ public class AuthenticationService {
         return true;
     }
 
-    public boolean validateToken(String token) {
-        return jwtUtil.validateToken(token) != null;
+    public void validateToken(String token) {
+        if (jwtUtil.validateToken(token) == null) {
+            throw new ResponseStatusException(BAD_REQUEST, "Токен не валидный");
+        }
     }
 
     public void logout(String token) {

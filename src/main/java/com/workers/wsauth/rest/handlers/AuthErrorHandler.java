@@ -16,16 +16,6 @@ public class AuthErrorHandler {
         return handleResponseStatusException(e);
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    ResponseEntity<String> handle(BadCredentialsException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-    }
-
-    @ExceptionHandler(LockedException.class)
-    ResponseEntity<String> handle(LockedException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-    }
-
     private ResponseEntity<String> handleResponseStatusException(ResponseStatusException e) {
         return ResponseEntity.status(e.getStatusCode().value()).body(e.getReason());
     }

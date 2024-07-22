@@ -18,34 +18,31 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Boolean registerNewCustomer(AuthRequest request) {
+    public void registerNewCustomer(AuthRequest request) {
         try {
             Customer newCustomer = new Customer();
             newCustomer.setUserName(request.username());
             newCustomer.setPassword(passwordEncoder.encode(request.password()));
             newCustomer.setEnabled(false);
             customerRepository.save(newCustomer);
-            return true;
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(BAD_REQUEST, "Пользователь " + request.username() + " уже существует.");
         }
     }
 
-    public Boolean requestToResetPassword(AuthRequest request) {
+    public void requestToResetPassword(AuthRequest request) {
         Customer customer = customerRepository.findCustomerByUserName(request.username())
                 .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Не удалось найти пользователя: " + request.username()));
         customer.setPassword(null);
         customer.setEnabled(false);
         customerRepository.save(customer);
-        return true;
     }
 
-    public Boolean requestToChangePassword(AuthRequest request) {
+    public void requestToChangePassword(AuthRequest request) {
         Customer customer = customerRepository.findCustomerByUserName(request.username())
                 .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Не удалось найти пользователя: " + request.username()));
         customer.setPassword(passwordEncoder.encode(request.password()));
         customer.setEnabled(true);
         customerRepository.save(customer);
-        return true;
     }
 }

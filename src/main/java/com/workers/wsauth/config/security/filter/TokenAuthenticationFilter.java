@@ -43,10 +43,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws IOException, ServletException {
 
-        if (!WHITELIST.contains(request.getRequestURI())) {
+        if (WHITELIST.contains(request.getRequestURI())) {
+            filterChain.doFilter(request, response);
+        } else {
             doFilterRequest(request, response, filterChain);
         }
-        filterChain.doFilter(request, response);
     }
 
     private void doFilterRequest(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException {
