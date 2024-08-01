@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +25,19 @@ public class AuthenticationService {
     public AuthResponse authenticate(AuthRequest request) {
         return Optional.of(request)
                 .map(this::validateUserActivity)
+                .map(this::validatePassword)
                 .map(this::createAuthenticationResponse)
                 .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "[AuthenticationService -> authenticate] Что-то пошло не так"));
     }
 
-    private Customer validateUserActivity(AuthRequest request) {
+    private AuthRequest validateUserActivity(AuthRequest request) {
+        if (customerRepository.existsCustomerByUserName(request.username(), Boolean.TRUE)) return request;
+        throw new ResponseStatusException(BAD_REQUEST, "Введен неверный пароль");
+    }
+
+    private Customer validatePassword(AuthRequest request) {
         var customer = customerRepository.findCustomerByUserNameAndEnabled(request.username(), Boolean.TRUE);
+        if (request.otp() && customer != null) return customer;
         if (customer != null
                 && passwordEncoder.matches(request.password(), customer.getPassword())) {
             return customer;
