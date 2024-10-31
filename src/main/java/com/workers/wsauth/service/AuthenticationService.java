@@ -31,7 +31,7 @@ public class AuthenticationService {
     }
 
     private AuthRequest validateUserActivity(AuthRequest request) {
-        if (customerRepository.existsCustomerByUserName(request.username(), Boolean.TRUE)) return request;
+        if (customerRepository.existsCustomerByUserNameAndEnabled(request.username(), Boolean.TRUE)) return request;
         throw new ResponseStatusException(BAD_REQUEST, "Введен неверный пароль");
     }
 
