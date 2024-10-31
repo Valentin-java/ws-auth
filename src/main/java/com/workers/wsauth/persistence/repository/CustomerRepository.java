@@ -16,5 +16,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @EntityGraph("customer_roles")
     Customer findCustomerByUserNameAndEnabled(String userName, Boolean enabled);
 
-    Boolean existsCustomerByUserName(String userName, Boolean enabled);
+    Boolean existsCustomerByUserNameAndEnabled(String userName, Boolean enabled);
 }

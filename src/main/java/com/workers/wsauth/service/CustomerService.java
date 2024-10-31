@@ -9,12 +9,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
 
+    private final static String BY_OTP_PASS = "BY_OTP";
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -22,7 +25,11 @@ public class CustomerService {
         try {
             Customer newCustomer = new Customer();
             newCustomer.setUserName(request.username());
-            newCustomer.setPassword(passwordEncoder.encode(request.password()));
+            Optional.ofNullable(request.otp())
+                    .filter(Boolean.TRUE::equals)
+                    .ifPresentOrElse(
+                            byOtp -> newCustomer.setPassword(passwordEncoder.encode(BY_OTP_PASS)),
+                            () -> newCustomer.setPassword(passwordEncoder.encode(request.password())));
             newCustomer.setEnabled(false);
             customerRepository.save(newCustomer);
         } catch (DataIntegrityViolationException e) {
